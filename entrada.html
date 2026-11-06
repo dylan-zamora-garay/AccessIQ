@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrada - AccessIQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #050505; --card: #111111; --borde: #2a1a0e;
+      --naranja: #ff6a00; --naranja-claro: #ff9a3c;
+      --texto: #ffffff; --gris: #9a9a9a;
+      --verde: #22c55e; --rojo: #ff5a5a; --amarillo: #facc15;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--texto); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 250px; background: #0a0a0a; border-right: 1px solid var(--borde); padding: 24px 18px; display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; }
+    .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding: 0 6px; }
+    .marca-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--naranja), #ff8a2a); border-radius: 12px; display: grid; place-items: center; box-shadow: 0 0 18px rgba(255,106,0,.45); }
+    .marca-logo span { width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; }
+    .marca h2 { font-size: 20px; font-weight: 700; }
+    .menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .menu a { padding: 12px 14px; border-radius: 12px; color: var(--gris); text-decoration: none; font-weight: 500; border: 1px solid transparent; transition: all .2s; }
+    .menu a:hover { color: var(--texto); background: #161616; }
+    .menu a.activo { color: var(--naranja-claro); background: rgba(255,106,0,.1); border-color: rgba(255,106,0,.35); }
+    .salir { color: var(--rojo); text-decoration: none; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,90,90,.3); text-align: center; font-weight: 500; }
+    .salir:hover { background: rgba(255,90,90,.1); }
+
+    .contenido { margin-left: 250px; flex: 1; padding: 32px 40px; min-width: 0; }
+    .contenido > h1 { font-size: 30px; font-weight: 700; }
+    .sub { color: var(--gris); margin: 4px 0 24px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
+    .caja { background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 24px; }
+    .caja h3 { font-size: 18px; margin-bottom: 16px; }
+
+    .camara { position: relative; background: #000; border-radius: 14px; overflow: hidden; border: 2px solid var(--borde); aspect-ratio: 4/3; transition: border-color .3s, box-shadow .3s; }
+    .camara video { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); }
+    .camara .mensaje { position: absolute; inset: 0; display: grid; place-items: center; color: var(--gris); text-align: center; padding: 20px; font-size: 14px; }
+    .camara.ok { border-color: var(--verde); box-shadow: 0 0 30px rgba(34,197,94,.35); }
+    .camara.no { border-color: var(--rojo); box-shadow: 0 0 30px rgba(255,90,90,.35); }
+    .camara.sin { border-color: var(--amarillo); box-shadow: 0 0 30px rgba(250,204,21,.25); }
+    .oculto { display: none !important; }
+
+    .btn { width: 100%; margin-top: 16px; font-family: inherit; font-size: 17px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #ff7a00, #ff4d00); border: none; border-radius: 14px; padding: 16px; cursor: pointer; transition: filter .2s; }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .voz-btn { width: 100%; margin-top: 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--gris); background: #1a1a1a; border: 1px solid var(--borde); border-radius: 12px; padding: 11px; cursor: pointer; transition: all .2s; }
+    .voz-btn:hover { border-color: var(--naranja); color: var(--texto); }
+
+    .resultado { text-align: center; padding: 10px 0; }
+    .resultado .icono { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 16px; font-size: 40px; font-weight: 700; background: #1a1a1a; color: var(--gris); }
+    .resultado h2 { font-size: 22px; margin-bottom: 8px; }
+    .resultado p { color: var(--gris); font-size: 15px; line-height: 1.5; }
+    .resultado .hora { margin-top: 14px; font-size: 13px; color: var(--gris); }
+    .resultado .foto { width: 110px; height: 110px; object-fit: cover; border-radius: 16px; border: 2px solid var(--borde); margin: 0 auto 14px; display: block; }
+
+    .resultado.ok .icono { background: rgba(34,197,94,.15); color: var(--verde); }
+    .resultado.ok h2 { color: var(--verde); }
+    .resultado.no .icono { background: rgba(255,90,90,.15); color: var(--rojo); }
+    .resultado.no h2 { color: var(--rojo); }
+    .resultado.sin .icono { background: rgba(250,204,21,.15); color: var(--amarillo); }
+    .resultado.sin h2 { color: var(--amarillo); }
+
+    @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { position: static; width: 100%; border-right: none; }
+      .contenido { margin-left: 0; padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="marca">
+      <div class="marca-logo"><span></span></div>
+      <h2>AccessIQ</h2>
+    </div>
+    <nav class="menu">
+      <a href="{{ url_for('panel') }}">Panel</a>
+      <a href="{{ url_for('personas') }}">Personas</a>
+      <a href="{{ url_for('entrada') }}" class="activo">Entrada</a>
+      <a href="{{ url_for('historial') }}">Historial</a>
+      {% if es_admin %}<a href="{{ url_for('usuarios') }}">Usuarios</a>{% endif %}
+    </nav>
+    <a href="{{ url_for('logout') }}" class="salir">Cerrar sesión</a>
+  </aside>
+
+  <main class="contenido">
+    <h1>Entrada</h1>
+    <p class="sub">Mira de frente a la cámara para verificar tu acceso.</p>
+
+    <div class="grid">
+
+      <section class="caja">
+        <div class="camara" id="marco">
+          <video id="video" autoplay playsinline muted></video>
+          <div class="mensaje" id="mensajeCamara">Iniciando cámara...</div>
+        </div>
+        <button class="btn" id="btnVerificar" disabled>Verificar acceso</button>
+        <button type="button" class="voz-btn" id="btnVoz">🔊 Voz: activada</button>
+        <canvas id="canvas" class="oculto"></canvas>
+      </section>
+
+      <section class="caja">
+        <h3>Resultado</h3>
+        <div class="resultado" id="resultado">
+          <div class="icono" id="icono">?</div>
+          <img class="foto oculto" id="foto" alt="">
+          <h2 id="titulo">Listo para verificar</h2>
+          <p id="detalle">Presiona el botón cuando la persona esté frente a la cámara.</p>
+          <div class="hora" id="hora"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const marco = document.getElementById("marco");
+    const mensajeCamara = document.getElementById("mensajeCamara");
+    const btn = document.getElementById("btnVerificar");
+
+    const resultado = document.getElementById("resultado");
+    const icono = document.getElementById("icono");
+    const foto = document.getElementById("foto");
+    const titulo = document.getElementById("titulo");
+    const detalle = document.getElementById("detalle");
+    const hora = document.getElementById("hora");
+
+    let temporizador = null;
+
+    // ----- Voz -----
+    const btnVoz = document.getElementById("btnVoz");
+    let vozActiva = true;
+    try { vozActiva = localStorage.getItem("voz") !== "off"; } catch (e) {}
+
+    if ("speechSynthesis" in window) speechSynthesis.getVoices();
+
+    function pintarVoz() {
+      btnVoz.textContent = vozActiva ? "🔊 Voz: activada" : "🔇 Voz: desactivada";
+    }
+    pintarVoz();
+
+    btnVoz.addEventListener("click", () => {
+      vozActiva = !vozActiva;
+      try { localStorage.setItem("voz", vozActiva ? "on" : "off"); } catch (e) {}
+      if (!vozActiva && "speechSynthesis" in window) speechSynthesis.cancel();
+      pintarVoz();
+      if (vozActiva) hablar("Voz activada.");
+    });
+
+    function elegirVoz() {
+      const voces = speechSynthesis.getVoices();
+      const preferidas = ["es-CO", "es-MX", "es-US", "es-419", "es-ES"];
+      for (const idioma of preferidas) {
+        const v = voces.find(x => x.lang.replace("_", "-") === idioma);
+        if (v) return v;
+      }
+      return voces.find(x => x.lang.toLowerCase().startsWith("es")) || null;
+    }
+
+    function hablar(texto) {
+      if (!vozActiva || !("speechSynthesis" in window)) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(texto);
+      const v = elegirVoz();
+      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "es-CO"; }
+      u.rate = 1;
+      u.pitch = 1;
+      speechSynthesis.speak(u);
+    }
+
+    function anunciar(d) {
+      if (d.estado === "autorizado") {
+        hablar("Acceso autorizado. Hola, " + d.nombre + ".");
+      } else if (d.estado === "rechazado") {
+        const m = (d.mensaje || "").toLowerCase();
+        if (m.includes("no registrado")) {
+          hablar("Acceso denegado. Rostro no registrado.");
+        } else if (m.includes("permiso")) {
+          hablar("Acceso denegado. " + d.nombre + ", no tiene permiso de acceso.");
+        } else if (m.includes("horario")) {
+          hablar("Acceso denegado. " + d.nombre + ", está fuera de su horario.");
+        } else {
+          hablar("Acceso denegado.");
+        }
+      } else if (d.estado === "sin_rostro") {
+        hablar("No se detectó ningún rostro. Mira de frente a la cámara.");
+      }
+    }
+
+    // ----- Cámara -----
+    async function iniciarCamara() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 }, audio: false
+        });
+        video.srcObject = stream;
+        mensajeCamara.classList.add("oculto");
+        btn.disabled = false;
+      } catch (e) {
+        mensajeCamara.textContent = "No se pudo acceder a la cámara. Revisa el permiso del navegador.";
+      }
+    }
+
+    function mostrar(clase, simbolo, tituloTxt, detalleTxt, horaTxt, fotoUrl) {
+      resultado.className = "resultado " + clase;
+      marco.className = "camara " + clase;
+      icono.textContent = simbolo;
+      titulo.textContent = tituloTxt;
+      detalle.textContent = detalleTxt;
+      hora.textContent = horaTxt ? "Hora: " + horaTxt : "";
+
+      if (fotoUrl) {
+        foto.src = fotoUrl;
+        foto.classList.remove("oculto");
+        icono.classList.add("oculto");
+      } else {
+        foto.classList.add("oculto");
+        icono.classList.remove("oculto");
+      }
+
+      clearTimeout(temporizador);
+      temporizador = setTimeout(reiniciar, 6000);
+    }
+
+    function reiniciar() {
+      resultado.className = "resultado";
+      marco.className = "camara";
+      icono.textContent = "?";
+      icono.classList.remove("oculto");
+      foto.classList.add("oculto");
+      titulo.textContent = "Listo para verificar";
+      detalle.textContent = "Presiona el botón cuando la persona esté frente a la cámara.";
+      hora.textContent = "";
+    }
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.textContent = "Verificando...";
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      const imagen = canvas.toDataURL("image/jpeg", 0.9);
+
+      try {
+        const resp = await fetch("{{ url_for('verificar_entrada') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ foto: imagen })
+        });
+        const d = await resp.json();
+
+        if (d.estado === "autorizado") {
+          mostrar("ok", "✓", d.nombre, d.mensaje, d.hora, d.foto);
+        } else if (d.estado === "rechazado") {
+          mostrar("no", "✕", d.nombre || "Acceso denegado", d.mensaje, d.hora, d.foto);
+        } else if (d.estado === "sin_rostro") {
+          mostrar("sin", "!", "Sin rostro", d.mensaje, d.hora, null);
+        } else {
+          mostrar("sin", "!", "Error", d.mensaje || "Ocurrió un problema.", "", null);
+        }
+
+        anunciar(d);
+      } catch (e) {
+        mostrar("sin", "!", "Error de conexión", "No se pudo comunicar con el servidor.", "", null);
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Verificar acceso";
+    });
+
+    iniciarCamara();
+  </script>
+
+</body>
+</html>

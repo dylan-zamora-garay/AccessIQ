@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personas - AccessIQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #050505; --card: #111111; --borde: #2a1a0e;
+      --naranja: #ff6a00; --naranja-claro: #ff9a3c;
+      --texto: #ffffff; --gris: #9a9a9a;
+      --verde: #22c55e; --rojo: #ff5a5a;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--texto); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 250px; background: #0a0a0a; border-right: 1px solid var(--borde); padding: 24px 18px; display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; }
+    .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding: 0 6px; }
+    .marca-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--naranja), #ff8a2a); border-radius: 12px; display: grid; place-items: center; box-shadow: 0 0 18px rgba(255,106,0,.45); }
+    .marca-logo span { width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; }
+    .marca h2 { font-size: 20px; font-weight: 700; }
+    .menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .menu a { padding: 12px 14px; border-radius: 12px; color: var(--gris); text-decoration: none; font-weight: 500; border: 1px solid transparent; transition: all .2s; }
+    .menu a:hover { color: var(--texto); background: #161616; }
+    .menu a.activo { color: var(--naranja-claro); background: rgba(255,106,0,.1); border-color: rgba(255,106,0,.35); }
+    .salir { color: var(--rojo); text-decoration: none; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,90,90,.3); text-align: center; font-weight: 500; }
+    .salir:hover { background: rgba(255,90,90,.1); }
+
+    .contenido { margin-left: 250px; flex: 1; padding: 32px 40px; min-width: 0; }
+    .contenido > h1 { font-size: 30px; font-weight: 700; }
+    .sub { color: var(--gris); margin: 4px 0 24px; }
+
+    .aviso { padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; }
+    .aviso.ok { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.4); color: #6ee7a0; }
+    .aviso.error { background: rgba(255,90,90,.1); border: 1px solid rgba(255,90,90,.4); color: #ff9a9a; }
+
+    .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+    .caja { background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 24px; }
+    .caja h3 { font-size: 18px; margin-bottom: 18px; }
+
+    .camara { position: relative; background: #000; border-radius: 14px; overflow: hidden; border: 1px solid var(--borde); aspect-ratio: 4/3; margin-bottom: 12px; }
+    .camara video, .camara canvas, .camara .vacio { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .camara .vacio { display: grid; place-items: center; color: var(--gris); font-size: 14px; text-align: center; padding: 16px; }
+    .camara video { transform: scaleX(-1); }
+    .camara canvas.espejo { transform: scaleX(-1); }
+    .oculto { display: none !important; }
+
+    .botones { display: flex; gap: 10px; margin-bottom: 18px; }
+    button, .btn { font-family: inherit; font-size: 14px; font-weight: 600; border: none; border-radius: 12px; padding: 11px 16px; cursor: pointer; transition: all .2s; }
+    .btn-naranja { background: linear-gradient(135deg, #ff7a00, #ff4d00); color: #fff; flex: 1; }
+    .btn-naranja:hover { filter: brightness(1.1); }
+    .btn-gris { background: #1a1a1a; color: var(--texto); border: 1px solid var(--borde); }
+    .btn-gris:hover { border-color: var(--naranja); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+
+    label { display: block; font-size: 14px; font-weight: 500; margin: 14px 0 6px; }
+    input, select { width: 100%; font-family: inherit; font-size: 15px; background: #0b0b0b; color: var(--texto); border: 1px solid var(--borde); border-radius: 12px; padding: 12px 14px; outline: none; }
+    input:focus, select:focus { border-color: var(--naranja); }
+    .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .enviar { width: 100%; margin-top: 22px; padding: 14px; font-size: 16px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; color: var(--gris); font-weight: 500; font-size: 13px; padding: 0 10px 12px; }
+    td { padding: 12px 10px; border-top: 1px solid var(--borde); font-size: 14px; vertical-align: middle; }
+    td img { width: 52px; height: 52px; object-fit: cover; border-radius: 12px; border: 1px solid var(--borde); display: block; }
+    .etiqueta { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .etiqueta.autorizado { background: rgba(34,197,94,.12); color: var(--verde); }
+    .etiqueta.denegado { background: rgba(255,90,90,.12); color: var(--rojo); }
+    .borrar { background: transparent; color: var(--rojo); border: 1px solid rgba(255,90,90,.3); padding: 7px 12px; font-size: 13px; }
+    .borrar:hover { background: rgba(255,90,90,.1); }
+    .editar { background: transparent; color: var(--naranja-claro); border: 1px solid rgba(255,106,0,.4); padding: 7px 12px; font-size: 13px; }
+    .editar:hover { background: rgba(255,106,0,.1); }
+    .acciones { display: flex; gap: 8px; align-items: center; }
+    .vacia { color: var(--gris); text-align: center; padding: 30px 0; }
+
+    /* ---------- Ventana para editar ---------- */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none; place-items: center; z-index: 50; padding: 20px; }
+    .modal.abierto { display: grid; }
+    .modal-caja { background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 26px; width: 100%; max-width: 440px; max-height: 92vh; overflow: auto; }
+    .modal-caja h3 { font-size: 20px; margin-bottom: 4px; }
+    .modal-sub { color: var(--gris); font-size: 14px; }
+    .modal-acciones { display: flex; gap: 10px; margin-top: 22px; }
+
+    @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { position: static; width: 100%; border-right: none; }
+      .contenido { margin-left: 0; padding: 24px 18px; }
+      .caja { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="marca">
+      <div class="marca-logo"><span></span></div>
+      <h2>AccessIQ</h2>
+    </div>
+    <nav class="menu">
+      <a href="{{ url_for('panel') }}">Panel</a>
+      <a href="{{ url_for('personas') }}" class="activo">Personas</a>
+      <a href="{{ url_for('entrada') }}">Entrada</a>
+      <a href="{{ url_for('historial') }}">Historial</a>
+      {% if es_admin %}<a href="{{ url_for('usuarios') }}">Usuarios</a>{% endif %}
+    </nav>
+    <a href="{{ url_for('logout') }}" class="salir">Cerrar sesión</a>
+  </aside>
+
+  <main class="contenido">
+    <h1>Personas</h1>
+    <p class="sub">Registra a quienes pueden entrar, con su foto, horario y permiso.</p>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% for categoria, texto in mensajes %}
+        <div class="aviso {{ categoria }}">{{ texto }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="grid">
+
+      <!-- Formulario con cámara o imagen -->
+      <section class="caja">
+        <h3>Nueva persona</h3>
+
+        <div class="camara">
+          <div class="vacio" id="vacio">Activa la cámara o sube una imagen.</div>
+          <video id="video" class="oculto" autoplay playsinline muted></video>
+          <canvas id="canvas" class="oculto"></canvas>
+        </div>
+
+        <div class="botones" style="margin-bottom:10px">
+          <button type="button" class="btn-gris" id="btnActivar">Activar cámara</button>
+          <button type="button" class="btn-naranja" id="btnCapturar" disabled>Tomar foto</button>
+        </div>
+        <div class="botones">
+          <button type="button" class="btn-gris" id="btnSubir" style="width:100%">Subir imagen desde el computador</button>
+          <input type="file" id="archivo" accept="image/*" class="oculto">
+        </div>
+
+        <form method="POST" action="{{ url_for('guardar_persona') }}" id="formulario">
+          <input type="hidden" name="foto" id="foto">
+
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Ej: Laura Gómez" required>
+
+          <label for="identificacion">Identificación</label>
+          <input type="text" id="identificacion" name="identificacion" placeholder="Número de documento" required>
+
+          <div class="fila">
+            <div>
+              <label for="hora_inicio">Entrada desde</label>
+              <input type="time" id="hora_inicio" name="hora_inicio" value="08:00" required>
+            </div>
+            <div>
+              <label for="hora_fin">Hasta</label>
+              <input type="time" id="hora_fin" name="hora_fin" value="18:00" required>
+            </div>
+          </div>
+
+          <label for="permiso">Permiso de acceso</label>
+          <select id="permiso" name="permiso">
+            <option value="autorizado">Autorizado</option>
+            <option value="denegado">Denegado</option>
+          </select>
+
+          <button type="submit" class="btn-naranja enviar">Guardar persona</button>
+        </form>
+      </section>
+
+      <!-- Tabla de personas -->
+      <section class="caja">
+        <h3>Personas registradas ({{ personas|length }})</h3>
+
+        {% if personas %}
+        <table>
+          <thead>
+            <tr>
+              <th>Foto</th><th>Nombre</th><th>Identificación</th>
+              <th>Horario</th><th>Permiso</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in personas %}
+            <tr>
+              <td><img src="{{ url_for('static', filename='fotos/' + p['foto']) }}" alt="Foto de {{ p['nombre'] }}"></td>
+              <td>{{ p['nombre'] }}</td>
+              <td>{{ p['identificacion'] }}</td>
+              <td>{{ p['hora_inicio'] }} - {{ p['hora_fin'] }}</td>
+              <td><span class="etiqueta {{ p['permiso'] }}">{{ p['permiso']|capitalize }}</span></td>
+              <td>
+                <div class="acciones">
+                  <button type="button" class="editar"
+                          data-id="{{ p['id'] }}"
+                          data-nombre="{{ p['nombre'] }}"
+                          data-identificacion="{{ p['identificacion'] }}"
+                          data-inicio="{{ p['hora_inicio'] }}"
+                          data-fin="{{ p['hora_fin'] }}"
+                          data-permiso="{{ p['permiso'] }}">Editar</button>
+
+                  <form method="POST" action="{{ url_for('eliminar_persona', persona_id=p['id']) }}"
+                        onsubmit="return confirm('¿Eliminar a {{ p['nombre'] }}?');">
+                    <button type="submit" class="borrar">Eliminar</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+          <p class="vacia">Aún no hay personas registradas.</p>
+        {% endif %}
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Ventana para editar una persona -->
+  <div class="modal" id="modalEditar">
+    <div class="modal-caja">
+      <h3>Editar persona</h3>
+      <p class="modal-sub">Cambia los datos y guarda. La foto se mantiene.</p>
+
+      <form method="POST" id="formEditar">
+        <label for="e_nombre">Nombre completo</label>
+        <input type="text" id="e_nombre" name="nombre" required>
+
+        <label for="e_identificacion">Identificación</label>
+        <input type="text" id="e_identificacion" name="identificacion" required>
+
+        <div class="fila">
+          <div>
+            <label for="e_inicio">Entrada desde</label>
+            <input type="time" id="e_inicio" name="hora_inicio" required>
+          </div>
+          <div>
+            <label for="e_fin">Hasta</label>
+            <input type="time" id="e_fin" name="hora_fin" required>
+          </div>
+        </div>
+
+        <label for="e_permiso">Permiso de acceso</label>
+        <select id="e_permiso" name="permiso">
+          <option value="autorizado">Autorizado</option>
+          <option value="denegado">Denegado</option>
+        </select>
+
+        <div class="modal-acciones">
+          <button type="button" class="btn-gris" id="cancelarEditar" style="flex:1">Cancelar</button>
+          <button type="submit" class="btn-naranja">Guardar cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const vacio = document.getElementById("vacio");
+    const btnActivar = document.getElementById("btnActivar");
+    const btnCapturar = document.getElementById("btnCapturar");
+    const btnSubir = document.getElementById("btnSubir");
+    const archivo = document.getElementById("archivo");
+    const campoFoto = document.getElementById("foto");
+    let stream = null;
+
+    function detenerCamara() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      video.srcObject = null;
+    }
+
+    function mostrarCanvas(espejo) {
+      video.classList.add("oculto");
+      vacio.classList.add("oculto");
+      canvas.classList.remove("oculto");
+      canvas.classList.toggle("espejo", espejo);
+    }
+
+    // ----- Opción 1: cámara -----
+    btnActivar.addEventListener("click", async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 }, audio: false
+        });
+        video.srcObject = stream;
+        campoFoto.value = "";
+        canvas.classList.add("oculto");
+        vacio.classList.add("oculto");
+        video.classList.remove("oculto");
+        btnActivar.textContent = "Cámara activa";
+        btnActivar.disabled = true;
+        btnCapturar.disabled = false;
+      } catch (e) {
+        vacio.classList.remove("oculto");
+        vacio.textContent = "No se pudo acceder a la cámara. Revisa el permiso del navegador o sube una imagen.";
+      }
+    });
+
+    btnCapturar.addEventListener("click", () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+      campoFoto.value = canvas.toDataURL("image/jpeg", 0.9);
+
+      detenerCamara();
+      mostrarCanvas(true);
+      btnCapturar.disabled = true;
+      btnActivar.disabled = false;
+      btnActivar.textContent = "Repetir con cámara";
+    });
+
+    // ----- Opción 2: subir imagen -----
+    btnSubir.addEventListener("click", () => archivo.click());
+
+    archivo.addEventListener("change", () => {
+      const file = archivo.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        alert("Selecciona un archivo de imagen.");
+        return;
+      }
+
+      const lector = new FileReader();
+      lector.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const max = 640;
+          const escala = Math.min(1, max / Math.max(img.width, img.height));
+          canvas.width = Math.round(img.width * escala);
+          canvas.height = Math.round(img.height * escala);
+
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          campoFoto.value = canvas.toDataURL("image/jpeg", 0.9);
+
+          detenerCamara();
+          mostrarCanvas(false);
+          btnCapturar.disabled = true;
+          btnActivar.disabled = false;
+          btnActivar.textContent = "Activar cámara";
+        };
+        img.onerror = () => alert("No se pudo leer la imagen.");
+        img.src = lector.result;
+      };
+      lector.readAsDataURL(file);
+      archivo.value = "";
+    });
+
+    // ----- Validar antes de guardar -----
+    document.getElementById("formulario").addEventListener("submit", (e) => {
+      if (!campoFoto.value) {
+        e.preventDefault();
+        alert("Primero toma la foto con la cámara o sube una imagen.");
+      }
+    });
+
+    // ----- Editar persona -----
+    const modal = document.getElementById("modalEditar");
+    const formEditar = document.getElementById("formEditar");
+
+    document.querySelectorAll(".editar").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        formEditar.action = "/personas/editar/" + boton.dataset.id;
+        document.getElementById("e_nombre").value = boton.dataset.nombre;
+        document.getElementById("e_identificacion").value = boton.dataset.identificacion;
+        document.getElementById("e_inicio").value = boton.dataset.inicio;
+        document.getElementById("e_fin").value = boton.dataset.fin;
+        document.getElementById("e_permiso").value = boton.dataset.permiso;
+        modal.classList.add("abierto");
+      });
+    });
+
+    function cerrarModal() { modal.classList.remove("abierto"); }
+
+    document.getElementById("cancelarEditar").addEventListener("click", cerrarModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) cerrarModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
+  </script>
+
+</body>
+</html>

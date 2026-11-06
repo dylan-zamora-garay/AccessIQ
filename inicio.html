@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Control Access</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: white;
+
+            background:
+                radial-gradient(
+                    circle at 75% 45%,
+                    rgba(249, 115, 22, 0.20),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 20% 80%,
+                    rgba(234, 88, 12, 0.10),
+                    transparent 30%
+                ),
+                #050505;
+
+            overflow-x: hidden;
+        }
+
+
+        /* =========================
+           FONDO TECNOLÓGICO
+        ========================= */
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+
+            background-image:
+                linear-gradient(
+                    rgba(249, 115, 22, 0.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(249, 115, 22, 0.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 45px 45px;
+
+            pointer-events: none;
+        }
+
+
+        /* =========================
+           BARRA SUPERIOR
+        ========================= */
+
+        nav {
+            height: 75px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 60px;
+
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+
+            background: rgba(5,5,5,0.75);
+
+            backdrop-filter: blur(10px);
+
+            position: relative;
+            z-index: 5;
+        }
+
+
+        .logo {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 21px;
+            font-weight: bold;
+        }
+
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background: linear-gradient(
+                135deg,
+                #ea580c,
+                #f97316
+            );
+
+            box-shadow:
+                0 0 20px rgba(249,115,22,0.45);
+
+            font-size: 20px;
+        }
+
+
+        /* =========================
+           ESTADO DEL SISTEMA
+        ========================= */
+
+        .estado {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            color: #b9b9c4;
+
+            font-size: 14px;
+        }
+
+
+        .punto {
+            width: 9px;
+            height: 9px;
+
+            background: #22c55e;
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 12px rgba(34,197,94,0.8);
+        }
+
+
+        /* =========================
+           CONTENIDO PRINCIPAL
+        ========================= */
+
+        .contenedor {
+            min-height: calc(100vh - 75px);
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            align-items: center;
+
+            gap: 70px;
+
+            padding: 50px 70px;
+
+            position: relative;
+
+            z-index: 2;
+        }
+
+
+        .contenido {
+            max-width: 620px;
+        }
+
+
+        /* ETIQUETA */
+
+        .etiqueta {
+            display: inline-block;
+
+            padding: 8px 15px;
+
+            margin-bottom: 20px;
+
+            border: 1px solid rgba(249,115,22,0.4);
+
+            border-radius: 20px;
+
+            background: rgba(249,115,22,0.08);
+
+            color: #fb923c;
+
+            font-size: 12px;
+
+            letter-spacing: 1.5px;
+        }
+
+
+        /* TITULO */
+
+        h1 {
+            font-size: 58px;
+
+            line-height: 1.05;
+
+            margin-bottom: 25px;
+        }
+
+
+        h1 span {
+            background: linear-gradient(
+                90deg,
+                #f97316,
+                #fdba74
+            );
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+        }
+
+
+        /* DESCRIPCIÓN */
+
+        .descripcion {
+            max-width: 550px;
+
+            color: #a1a1aa;
+
+            font-size: 18px;
+
+            line-height: 1.6;
+
+            margin-bottom: 35px;
+        }
+
+
+        /* =========================
+           BOTONES
+        ========================= */
+
+        .botones {
+            display: flex;
+
+            gap: 15px;
+        }
+
+
+        .btn {
+            padding: 15px 25px;
+
+            border-radius: 10px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+
+            transition: 0.3s;
+        }
+
+
+        /* BOTÓN PRINCIPAL */
+
+        .btn-principal {
+            color: white;
+
+            background: linear-gradient(
+                135deg,
+                #ea580c,
+                #f97316
+            );
+
+            box-shadow:
+                0 8px 25px rgba(249,115,22,0.25);
+        }
+
+
+        .btn-principal:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 12px 30px rgba(249,115,22,0.4);
+        }
+
+
+        /* BOTÓN SECUNDARIO */
+
+        .btn-secundario {
+            color: white;
+
+            border: 1px solid #3f3f46;
+
+            background: rgba(255,255,255,0.03);
+        }
+
+
+        .btn-secundario:hover {
+            transform: translateY(-3px);
+
+            border-color: #f97316;
+
+            background: rgba(249,115,22,0.08);
+        }
+
+
+        /* =========================
+           PANEL DE PRESENTACIÓN
+        ========================= */
+
+        .panel {
+            width: 390px;
+            height: 390px;
+
+            justify-self: center;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: relative;
+
+            border-radius: 25px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(30,30,35,0.95),
+                    rgba(10,10,12,0.95)
+                );
+
+            border: 1px solid rgba(249,115,22,0.22);
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.65),
+                0 0 50px rgba(234,88,12,0.08);
+        }
+
+
+        /* =========================
+           CÍRCULOS DECORATIVOS
+        ========================= */
+
+        .circulo {
+            position: absolute;
+
+            border-radius: 50%;
+
+            border: 1px solid rgba(249,115,22,0.18);
+        }
+
+
+        .circulo-1 {
+            width: 300px;
+            height: 300px;
+        }
+
+
+        .circulo-2 {
+            width: 235px;
+            height: 235px;
+        }
+
+
+        .circulo-3 {
+            width: 170px;
+            height: 170px;
+
+            border-color: rgba(249,115,22,0.35);
+
+            box-shadow:
+                0 0 30px rgba(249,115,22,0.08);
+        }
+
+
+        /* =========================
+           ICONO DE SEGURIDAD
+        ========================= */
+
+        .icono-seguridad {
+            position: relative;
+
+            z-index: 2;
+
+            width: 120px;
+            height: 120px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    #3b1b0a,
+                    #120b06
+                );
+
+            border: 2px solid #f97316;
+
+            box-shadow:
+                0 0 30px rgba(249,115,22,0.35);
+
+            font-size: 55px;
+        }
+
+
+        /* =========================
+           ANIMACIÓN DEL CANDADO
+           (solo se mueve el candado)
+        ========================= */
+
+        .candado {
+            display: inline-block;
+
+            transform-origin: 50% 15%;
+
+            animation: balanceo 3s ease-in-out infinite;
+        }
+
+
+        @keyframes balanceo {
+
+            0%, 100% {
+                transform: translateY(0) rotate(-8deg);
+            }
+
+            50% {
+                transform: translateY(-8px) rotate(8deg);
+            }
+        }
+
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .candado {
+                animation: none;
+            }
+        }
+
+
+        /* =========================
+           TEXTO DEL PANEL
+        ========================= */
+
+        .panel-texto {
+            position: absolute;
+
+            bottom: 45px;
+
+            text-align: center;
+
+            z-index: 3;
+        }
+
+
+        .panel-texto h2 {
+            font-size: 19px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .panel-texto p {
+            color: #8f8f9b;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           CARACTERÍSTICAS
+        ========================= */
+
+        .caracteristicas {
+            position: absolute;
+
+            bottom: 25px;
+            left: 70px;
+
+            display: flex;
+
+            gap: 35px;
+
+            color: #71717a;
+
+            font-size: 12px;
+        }
+
+
+        .caracteristica {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+        }
+
+
+        .mini-punto {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: #f97316;
+
+            box-shadow:
+                0 0 8px rgba(249,115,22,0.7);
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .contenedor {
+                grid-template-columns: 1fr;
+
+                padding: 45px 25px;
+            }
+
+
+            .contenido {
+                text-align: center;
+
+                margin: auto;
+            }
+
+
+            .descripcion {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+
+            .botones {
+                justify-content: center;
+            }
+
+
+            .caracteristicas {
+                position: static;
+
+                justify-content: center;
+
+                margin: 20px;
+
+                flex-wrap: wrap;
+            }
+        }
+
+
+        @media (max-width: 500px) {
+
+            nav {
+                padding: 0 20px;
+            }
+
+
+            .estado {
+                display: none;
+            }
+
+
+            h1 {
+                font-size: 42px;
+            }
+
+
+            .panel {
+                width: 100%;
+
+                max-width: 360px;
+            }
+
+
+            .botones {
+                flex-direction: column;
+            }
+
+
+            .btn {
+                text-align: center;
+            }
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         BARRA SUPERIOR
+    ========================= -->
+
+    <nav>
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ◉
+            </div>
+
+            AccessIQ
+
+        </div>
+
+
+        <div class="estado">
+
+            <div class="punto"></div>
+
+            Sistema operativo
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- =========================
+         CONTENIDO PRINCIPAL
+    ========================= -->
+
+    <main class="contenedor">
+
+
+        <section class="contenido">
+
+
+            <div class="etiqueta">
+
+                SISTEMA DE SEGURIDAD INTELIGENTE
+
+            </div>
+
+
+            <h1>
+
+                Control de acceso
+                <br>
+
+                <span>inteligente.</span>
+
+            </h1>
+
+
+            <p class="descripcion">
+
+                
+                Controla el acceso de tu personal en tiempo real 
+                mediante tecnología avanzada de reconocimiento facial.
+
+            </p>
+
+
+            <div class="botones">
+
+
+              <a href="/login" class="btn btn-principal">
+                   Iniciar sesión
+                </a>
+
+
+               
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =========================
+             PANEL DE PRESENTACIÓN
+        ========================= -->
+
+        <section class="panel">
+
+
+            <!-- CÍRCULOS -->
+
+            <div class="circulo circulo-1"></div>
+
+            <div class="circulo circulo-2"></div>
+
+            <div class="circulo circulo-3"></div>
+
+
+            <!-- ICONO -->
+
+            <div class="icono-seguridad">
+
+                <span class="candado">🔐</span>
+
+            </div>
+
+
+            <!-- TEXTO -->
+
+            <div class="panel-texto">
+
+                <h2>
+                    Acceso seguro
+                </h2>
+
+                <p>
+                    Tecnología de reconocimiento facial
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         CARACTERÍSTICAS
+    ========================= -->
+
+    <div class="caracteristicas">
+
+
+        <div class="caracteristica">
+
+            <div class="mini-punto"></div>
+
+            Seguridad
+
+        </div>
+
+
+        <div class="caracteristica">
+
+            <div class="mini-punto"></div>
+
+            Reconocimiento
+
+        </div>
+
+
+        <div class="caracteristica">
+
+            <div class="mini-punto"></div>
+
+            Historial
+
+        </div>
+
+
+    </div>
+
+
+</body>
+</html>

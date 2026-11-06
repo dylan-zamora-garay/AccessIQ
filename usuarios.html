@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios - AccessIQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #050505; --card: #111111; --borde: #2a1a0e;
+      --naranja: #ff6a00; --naranja-claro: #ff9a3c;
+      --texto: #ffffff; --gris: #9a9a9a;
+      --verde: #22c55e; --rojo: #ff5a5a;
+    }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--texto); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 250px; background: #0a0a0a; border-right: 1px solid var(--borde); padding: 24px 18px; display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; }
+    .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding: 0 6px; }
+    .marca-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--naranja), #ff8a2a); border-radius: 12px; display: grid; place-items: center; box-shadow: 0 0 18px rgba(255,106,0,.45); }
+    .marca-logo span { width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; }
+    .marca h2 { font-size: 20px; font-weight: 700; }
+    .menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .menu a { padding: 12px 14px; border-radius: 12px; color: var(--gris); text-decoration: none; font-weight: 500; border: 1px solid transparent; transition: all .2s; }
+    .menu a:hover { color: var(--texto); background: #161616; }
+    .menu a.activo { color: var(--naranja-claro); background: rgba(255,106,0,.1); border-color: rgba(255,106,0,.35); }
+    .salir { color: var(--rojo); text-decoration: none; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,90,90,.3); text-align: center; font-weight: 500; }
+    .salir:hover { background: rgba(255,90,90,.1); }
+
+    .contenido { margin-left: 250px; flex: 1; padding: 32px 40px; min-width: 0; }
+    .contenido > h1 { font-size: 30px; font-weight: 700; }
+    .sub { color: var(--gris); margin: 4px 0 24px; }
+
+    .aviso { padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; }
+    .aviso.ok { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.4); color: #6ee7a0; }
+    .aviso.error { background: rgba(255,90,90,.1); border: 1px solid rgba(255,90,90,.4); color: #ff9a9a; }
+
+    .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+    .caja { background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 24px; }
+    .caja h3 { font-size: 18px; margin-bottom: 18px; }
+
+    label { display: block; font-size: 14px; font-weight: 500; margin: 14px 0 6px; }
+    label:first-of-type { margin-top: 0; }
+    input, select { width: 100%; font-family: inherit; font-size: 15px; background: #0b0b0b; color: var(--texto); border: 1px solid var(--borde); border-radius: 12px; padding: 12px 14px; outline: none; }
+    input:focus, select:focus { border-color: var(--naranja); }
+    .ayuda { color: var(--gris); font-size: 12px; margin-top: 6px; }
+
+    button { font-family: inherit; font-size: 14px; font-weight: 600; border: none; border-radius: 12px; padding: 11px 16px; cursor: pointer; transition: all .2s; }
+    .btn-naranja { background: linear-gradient(135deg, #ff7a00, #ff4d00); color: #fff; flex: 1; }
+    .btn-naranja:hover { filter: brightness(1.1); }
+    .btn-gris { background: #1a1a1a; color: var(--texto); border: 1px solid var(--borde); }
+    .btn-gris:hover { border-color: var(--naranja); }
+    .enviar { width: 100%; margin-top: 22px; padding: 14px; font-size: 16px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; color: var(--gris); font-weight: 500; font-size: 13px; padding: 0 10px 12px; }
+    td { padding: 14px 10px; border-top: 1px solid var(--borde); font-size: 14px; vertical-align: middle; }
+    .gris { color: var(--gris); }
+    .tu { color: var(--naranja-claro); font-size: 12px; margin-left: 6px; }
+
+    .etiqueta { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .etiqueta.admin { background: rgba(255,106,0,.12); color: var(--naranja-claro); }
+    .etiqueta.usuario { background: rgba(255,255,255,.07); color: var(--gris); }
+
+    .acciones { display: flex; gap: 8px; align-items: center; }
+    .editar { background: transparent; color: var(--naranja-claro); border: 1px solid rgba(255,106,0,.4); padding: 7px 12px; font-size: 13px; }
+    .editar:hover { background: rgba(255,106,0,.1); }
+    .borrar { background: transparent; color: var(--rojo); border: 1px solid rgba(255,90,90,.3); padding: 7px 12px; font-size: 13px; }
+    .borrar:hover { background: rgba(255,90,90,.1); }
+
+    /* ---------- Ventana para cambiar contraseña ---------- */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none; place-items: center; z-index: 50; padding: 20px; }
+    .modal.abierto { display: grid; }
+    .modal-caja { background: var(--card); border: 1px solid var(--borde); border-radius: 18px; padding: 26px; width: 100%; max-width: 420px; }
+    .modal-caja h3 { font-size: 20px; margin-bottom: 4px; }
+    .modal-sub { color: var(--gris); font-size: 14px; margin-bottom: 18px; }
+    .modal-acciones { display: flex; gap: 10px; margin-top: 22px; }
+
+    @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) {
+      body { flex-direction: column; }
+      .sidebar { position: static; width: 100%; border-right: none; }
+      .contenido { margin-left: 0; padding: 24px 18px; }
+      .caja { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="marca">
+      <div class="marca-logo"><span></span></div>
+      <h2>AccessIQ</h2>
+    </div>
+    <nav class="menu">
+      <a href="{{ url_for('panel') }}">Panel</a>
+      <a href="{{ url_for('personas') }}">Personas</a>
+      <a href="{{ url_for('entrada') }}">Entrada</a>
+      <a href="{{ url_for('historial') }}">Historial</a>
+      <a href="{{ url_for('usuarios') }}" class="activo">Usuarios</a>
+    </nav>
+    <a href="{{ url_for('logout') }}" class="salir">Cerrar sesión</a>
+  </aside>
+
+  <main class="contenido">
+    <h1>Usuarios</h1>
+    <p class="sub">Cuentas que pueden iniciar sesión en el sistema. Solo el administrador ve esta página.</p>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+      {% for categoria, texto in mensajes %}
+        <div class="aviso {{ categoria }}">{{ texto }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="grid">
+
+      <!-- Crear usuario -->
+      <section class="caja">
+        <h3>Nuevo usuario</h3>
+        <form method="POST" action="{{ url_for('crear_usuario') }}" autocomplete="off">
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" name="usuario" placeholder="Ej: laura" required minlength="3">
+
+          <label for="clave">Contraseña</label>
+          <input type="password" id="clave" name="clave" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+
+          <label for="rol">Rol</label>
+          <select id="rol" name="rol">
+            <option value="usuario">Usuario</option>
+            <option value="admin">Administrador</option>
+          </select>
+          <p class="ayuda">El administrador puede crear, cambiar y eliminar usuarios.</p>
+
+          <button type="submit" class="btn-naranja enviar">Crear usuario</button>
+        </form>
+      </section>
+
+      <!-- Lista -->
+      <section class="caja">
+        <h3>Usuarios registrados ({{ usuarios|length }})</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Creado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in usuarios %}
+            <tr>
+              <td>
+                {{ u['usuario'] }}
+                {% if u['usuario']|lower == actual|lower %}<span class="tu">(tú)</span>{% endif %}
+              </td>
+              <td>
+                <span class="etiqueta {{ u['rol'] }}">
+                  {% if u['rol'] == 'admin' %}Administrador{% else %}Usuario{% endif %}
+                </span>
+              </td>
+              <td class="gris">{{ u['creado'][:10] }}</td>
+              <td>
+                <div class="acciones">
+                  <button type="button" class="editar"
+                          data-id="{{ u['id'] }}"
+                          data-nombre="{{ u['usuario'] }}">Cambiar clave</button>
+
+                  {% if u['usuario']|lower != actual|lower %}
+                  <form method="POST" action="{{ url_for('eliminar_usuario', usuario_id=u['id']) }}"
+                        onsubmit="return confirm('¿Eliminar al usuario {{ u['usuario'] }}?');">
+                    <button type="submit" class="borrar">Eliminar</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Ventana: cambiar contraseña -->
+  <div class="modal" id="modalClave">
+    <div class="modal-caja">
+      <h3>Cambiar contraseña</h3>
+      <p class="modal-sub" id="modalNombre"></p>
+
+      <form method="POST" id="formClave" autocomplete="off">
+        <label for="nuevaClave">Nueva contraseña</label>
+        <input type="password" id="nuevaClave" name="clave" placeholder="Mínimo 4 caracteres" required minlength="4" autocomplete="new-password">
+
+        <div class="modal-acciones">
+          <button type="button" class="btn-gris" id="cancelarClave" style="flex:1">Cancelar</button>
+          <button type="submit" class="btn-naranja">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("modalClave");
+    const formClave = document.getElementById("formClave");
+
+    document.querySelectorAll(".editar").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        formClave.action = "/usuarios/clave/" + boton.dataset.id;
+        document.getElementById("modalNombre").textContent = "Usuario: " + boton.dataset.nombre;
+        document.getElementById("nuevaClave").value = "";
+        modal.classList.add("abierto");
+        document.getElementById("nuevaClave").focus();
+      });
+    });
+
+    function cerrarModal() { modal.classList.remove("abierto"); }
+
+    document.getElementById("cancelarClave").addEventListener("click", cerrarModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) cerrarModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
+  </script>
+
+</body>
+</html>
