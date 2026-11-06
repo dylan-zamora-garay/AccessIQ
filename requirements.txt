@@ -1,0 +1,2 @@
+flask
+face_recognition
