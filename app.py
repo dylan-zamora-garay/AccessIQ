@@ -15,12 +15,15 @@ try:
 except ImportError:
     Image = None
 
-# Forzar la ruta absoluta actual para que Flask busque los HTML sueltos en mysite/
+# Forzar la ruta absoluta actual para que Flask busque los HTML sueltos en la misma carpeta que app.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__,
             template_folder=BASE_DIR,
             static_folder=os.path.join(BASE_DIR, "static"))
-app.secret_key = "accessiq-clave-secreta-cambiala"
+
+# La clave secreta se lee de una variable de entorno (no se escribe en el código).
+# En desarrollo se usa un valor por defecto; en producción define SECRET_KEY.
+app.secret_key = os.environ.get("SECRET_KEY", "clave-solo-para-desarrollo")
 
 DB = os.path.join(BASE_DIR, "accessiq.db")
 CARPETA_FOTOS = os.path.join(BASE_DIR, "static", "fotos")
@@ -85,11 +88,14 @@ def iniciar_db():
             creado TEXT DEFAULT (datetime('now', 'localtime'))
         )
     """)
-    # Si no hay usuarios, se crea el administrador inicial (el que ya usabas)
+    # Si no hay usuarios, se crea el administrador inicial.
+    # La contraseña se lee de la variable de entorno ADMIN_PASSWORD
+    # (no se escribe en el código). Cámbiala al primer inicio de sesión.
     if con.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0] == 0:
+        clave_inicial = os.environ.get("ADMIN_PASSWORD", "cambia-esta-clave")
         con.execute(
             "INSERT INTO usuarios (usuario, password_hash, rol) VALUES (?, ?, 'admin')",
-            ("dylan", generate_password_hash("10225")),
+            ("admin", generate_password_hash(clave_inicial)),
         )
 
     con.commit()
