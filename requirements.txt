@@ -1,2 +1,3 @@
-flask
-face_recognition
+  flask
+  face_recognition
+  pillow
